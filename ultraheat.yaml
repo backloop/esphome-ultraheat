@@ -26,24 +26,32 @@ wifi:
 # Enable logging
 logger:
   level: DEBUG
-  baud_rate: 0 # disable logging over uart
+  #baud_rate: 0 # disable logging over uart
 
 captive_portal:
 
 # setup wakeup configuration
 uart:
-  id: uart_bus
-  tx_pin: 1
-  rx_pin: 3
-  baud_rate: 300
-  data_bits: 7
-  parity: EVEN
-  stop_bits: 2
+  - id: debug_uart
+    tx_pin: 1
+    rx_pin: 3
+    baud_rate: 115200
+    data_bits: 8
+    parity: NONE
+    stop_bits: 1
+  - id: ultraheat_uart
+    tx_pin: 4
+    rx_pin: 5
+    baud_rate: 300
+    data_bits: 7
+    parity: EVEN
+    stop_bits: 2
+
 
 sensor:
 - platform: custom
   lambda: |-
-    auto meter_sensor = new UltraheatReader(id(uart_bus));
+    auto meter_sensor = new UltraheatReader(id(ultraheat_uart));
     App.register_component(meter_sensor);
     return {
       //        meter_sensor->power_max_kw,
