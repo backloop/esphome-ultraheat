@@ -2,6 +2,9 @@ esphome:
   name: ultraheat
   includes:
     - ultraheat.h
+    - ultraheat_message.h
+    - ultraheat_parser.h
+#    - ultraheat.cpp
 
 esp8266:
   board: esp01_1m
@@ -51,7 +54,7 @@ uart:
 sensor:
 - platform: custom
   lambda: |-
-    auto meter_sensor = new UltraheatReader(id(ultraheat_uart));
+    auto meter_sensor = new Ultraheat(id(ultraheat_uart));
     App.register_component(meter_sensor);
     return {
       //        meter_sensor->power_max_kw,
@@ -81,12 +84,18 @@ sensor:
       // meter_sensor->settings_and_firmware
     };
 
+  # https://developers.home-assistant.io/docs/core/entity/sensor/#available-device-classes
   sensors:
-  - name: "Cumulative Active Import"
+  - name: "Heat Usage"
     unit_of_measurement: MWh
     accuracy_decimals: 3
     state_class: "total_increasing"
     device_class: "energy"
+#  - name: "Cumulative Active Import"
+#    unit_of_measurement: MWh
+#    accuracy_decimals: 3
+#    state_class: "total_increasing"
+#    device_class: "energy"
 #  - name: "Cumulative Active Export"
 #    unit_of_measurement: kWh
 #    accuracy_decimals: 3
