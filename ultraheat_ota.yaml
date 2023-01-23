@@ -1,0 +1,41 @@
+esphome:
+  name: ultraheat
+  includes:
+    - ultraheat_ota.h
+
+esp8266:
+  board: esp01_1m
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret api_encryption
+
+ota:
+  password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: !secret wifi_ap_ssid
+    password: !secret wifi_ap_password
+
+# Enable logging
+logger:
+  level: DEBUG
+  #baud_rate: 0 # disable logging over uart
+
+captive_portal:
+
+# setup wakeup configuration
+uart:
+  - id: debug_uart
+    tx_pin: 1
+    rx_pin: 3
+    baud_rate: 115200
+    data_bits: 8
+    parity: NONE
+    stop_bits: 1
