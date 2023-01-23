@@ -1,10 +1,13 @@
 esphome:
   name: ultraheat
   includes:
-    - ultraheat.h
+    - ultraheat_debug.h
     - ultraheat_message.h
     - ultraheat_parser.h
-#    - ultraheat.cpp
+    - statemachine.h
+    - ultraheat_io.h
+    - ultraheat_states.h
+    - ultraheat.h
 
 esp8266:
   board: esp01_1m
@@ -54,7 +57,7 @@ uart:
 sensor:
 - platform: custom
   lambda: |-
-    auto meter_sensor = new Ultraheat(id(ultraheat_uart));
+    auto meter_sensor = new UltraheatReader(id(ultraheat_uart));
     App.register_component(meter_sensor);
     return {
       //        meter_sensor->power_max_kw,
@@ -81,7 +84,7 @@ sensor:
       //        meter_sensor->return_temperature_max_previous_year_c,
       //        meter_sensor->device_number,
       //        meter_sensor->ownership_number,
-      // meter_sensor->settings_and_firmware
+      //        meter_sensor->settings_and_firmware
     };
 
   # https://developers.home-assistant.io/docs/core/entity/sensor/#available-device-classes
