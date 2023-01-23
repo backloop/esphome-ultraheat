@@ -30,3 +30,6 @@ ota: $(PROG_OTA)
 PHONY: check
 check: $(CHECK_PROG)
 
+PHONY: clean
+clean:
+	rm -rf $(CHECK_PROG)
