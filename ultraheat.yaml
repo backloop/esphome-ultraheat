@@ -8,6 +8,9 @@ esphome:
     - ultraheat_io.h
     - ultraheat_states.h
     - ultraheat.h
+  platformio_options:
+    build_flags:
+      - "-Wl,-Map=output.map"
 
 esp8266:
   board: esp01_1m
