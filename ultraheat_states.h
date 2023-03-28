@@ -29,11 +29,11 @@ namespace Ultraheat {
             {}
 
             void enter() override {
-                std::cout << "IdleState::enter()" << std::endl;
+                US_PRINTF("IdleState::enter()");
                 // init idle counter
             }
             bool tick() override {
-                std::cout << "IdleState::tick()" << std::endl;
+                US_PRINTF("IdleState::tick()");
                 // count idle time
                 return true;
             }
@@ -52,7 +52,7 @@ namespace Ultraheat {
             {}
 
             void enter() override {
-                std::cout << "WakeupState::enter()" << std::endl;
+                US_PRINTF("WakeupState::enter()");
 
                 this->io.setup();
 
@@ -64,17 +64,17 @@ namespace Ultraheat {
             }
 
             bool tick() override {
-                std::cout << "WakeupState::tick()" << std::endl;
+                US_PRINTF("WakeupState::tick()");
 
                 int ret;
                 uint8_t buffer[DATA_SIZE];
                 ret = this->io.read_line_nonblock(buffer, DATA_SIZE);
                 if (ret) {
-                    std::cout << "io.read_line_nonblock: " << ret << std::endl;
+                    US_PRINTF("io.read_line_nonblock: %d", ret);
                     return false;
                 }
 
-                std::cout  << "line: <" << buffer << ">" << std::endl;
+                US_PRINTF("line: <%s>", buffer);
 
                 // find last ocurrence of start character
                 char *start = strrchr((char *)buffer, '/');
@@ -96,7 +96,7 @@ namespace Ultraheat {
                 // use strtok() side effect that it replaces first occurrence of delimiter with '\0'
                 strtok((char *)buffer, "\r\n");
 
-                std::cout  << "line: " << buffer << std::endl;
+                US_PRINTF("line: %s", buffer);
 
                 return true;
             }
@@ -116,7 +116,7 @@ namespace Ultraheat {
             {}
 
             void enter() override {
-                std::cout << "MessageState::enter()" << std::endl;
+                US_PRINTF("MessageState::enter()");
                 // setup uart
                 this->io.setup();
                 // clear buffers
@@ -124,26 +124,26 @@ namespace Ultraheat {
             }
 
             bool tick() override {
-                std::cout << "MessageState::tick()" << std::endl;
+                US_PRINTF("MessageState::tick()");
 
                 int ret;
                 uint8_t buffer[DATA_SIZE];
                 ret = this->io.read_line_nonblock(buffer, DATA_SIZE);
                 if (ret) {
-                    std::cout << "io.read_line_nonblock: " << ret << std::endl;
+                    US_PRINTF("io.read_line_nonblock: %d", ret);
                     return false;
                 }
 
-                std::cout  << "line: " << buffer << std::endl;
+                US_PRINTF("line: %s", buffer);
 
                 // trim trailing characters, assume these exist only at the end
                 // use strtok() side effect that it replaces first occurrence of delimiter with '\0'
                 strtok((char *)buffer, "\r\n");
 
-                std::cout  << "line: " << buffer << std::endl;
+                US_PRINTF("line: %s", buffer);
 
                 if (buffer[0] == '!') {
-                    std::cout << "message done!" << std::endl;
+                    US_PRINTF("message done!");
                     // TODO: send
                     return true;
                 }
