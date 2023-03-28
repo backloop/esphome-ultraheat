@@ -15,8 +15,7 @@ $(PROG_OTA): Makefile $(PROG_OTA).h
 	esphome compile $(PROG_OTA).yaml
 
 $(CHECK_PROG): Makefile $(HDR) $(CHECK_SRC)
-	g++ $(CHECK_SRC) -o $(CHECK_PROG)
-	./$(CHECK_PROG)
+	g++ -Wall -Werror -Wpedantic $(CHECK_SRC) -o $(CHECK_PROG)
 
 PHONY: install
 install: $(PROG)
@@ -29,6 +28,7 @@ ota: $(PROG_OTA)
 
 PHONY: check
 check: $(CHECK_PROG)
+	./$(CHECK_PROG)
 
 PHONY: clean
 clean:
