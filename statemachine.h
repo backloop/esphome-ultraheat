@@ -16,7 +16,7 @@ namespace StateMachine {
         public:
 
             State ()
-                : next(NULL)
+                : next(nullptr)
             {}
 
             virtual void enter() { SM_PRINTF("State::enter()"); };
