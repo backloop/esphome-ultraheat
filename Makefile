@@ -1,6 +1,6 @@
 
 PROG = ultraheat
-HDR = ultraheat_io.h ultraheat_parser.h ultraheat_message.h ultraheat_states.h
+HDR = ultraheat_io.h ultraheat_parser.h ultraheat_message.h ultraheat_states.h statemachine.h
 OTHER_SRC = ultraheat.yaml secrets.yaml
 
 PROG_OTA = ultraheat_ota
