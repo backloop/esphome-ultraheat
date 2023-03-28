@@ -79,7 +79,7 @@ namespace Ultraheat {
                 // find last ocurrence of start character
                 char *start = strrchr((char *)buffer, '/');
 
-                if (start == NULL) {
+                if (start == nullptr) {
                     // Start char could not be found this is not the line
                     // we're looking for, continue
                     return false;
