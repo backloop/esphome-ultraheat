@@ -17,6 +17,7 @@
 //#define UM_PRINTF(f_, ...) ESP_LOGD("message: ", f_"\r\n", ##__VA_ARGS__)
 // ultraheat_parser
 //#define UP_PRINTF(f_, ...) printf("%s ", timestamp()), printf("parser:  "), printf((f_), ##__VA_ARGS__), printf("\n")
-
+// ultraheat_io
+//#define IO_PRINTF(f_, ...) printf("%s ", timestamp()), printf("io:      "), printf((f_), ##__VA_ARGS__), printf("\n")
 
 #endif // ULTRAHEAT_DEBUG

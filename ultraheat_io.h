@@ -4,6 +4,10 @@
 #define DATA_SIZE (128)
 #define LINE_SIZE (DATA_SIZE - 1) // make space for string termination
 
+#ifndef IO_PRINTF
+#define IO_PRINTF(...)
+#endif
+
 namespace Ultraheat {
 
     class IO {
@@ -79,7 +83,7 @@ namespace Ultraheat {
                 memset(this->write, 0, this->data + DATA_SIZE - this->write);
 
                 // remainder
-                std::cout << "remainder: <" << this->data << ">" << std::endl;
+                IO_PRINTF("remainder: <%s>", this->data);
 
                 return 0;
             }
