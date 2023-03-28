@@ -34,40 +34,49 @@ namespace Ultraheat {
             // 5 - line is not complete
             int read_line_nonblock(uint8_t* data, size_t max_size) {
 
-                int available = this->available();
-
-                if (!available) {
-                    return 1;
-                }
-
-                int space_remaining = (this->data + LINE_SIZE) - this->write;
-                if (space_remaining <= 0) {
-                    return 2;
-                }
-                std::cout << "space_remaining:" << space_remaining << std::endl;
-
-                int possible = available < space_remaining ? available : space_remaining;
-
-                if (!this->read_array(this->write, possible)) {
-                    return 3;
-                }
-                this->write += possible;
-                *this->write = '\0';
-                std::cout << "data: <" << this->data << ">" << std::endl;
-
                 // find newline
                 char c = '\n';
                 char *pos = strchr((char *)this->data, c);
 
-                if (pos == NULL) {
-                    return 5;
+                if (pos == nullptr) {
+                    // now newline found in buffer, read mmore data
+
+                    int available = this->available();
+
+                    if (!available) {
+                        return 1;
+                    }
+
+                    int space_remaining = (this->data + LINE_SIZE) - this->write;
+                    if (space_remaining <= 0) {
+                        return 2;
+                    }
+                    IO_PRINTF("space_remaining: %d", space_remaining);
+
+                    int possible = available < space_remaining ? available : space_remaining;
+
+                    if (!this->read_array(this->write, possible)) {
+                        return 3;
+                    }
+                    this->write += possible;
+                    *this->write = '\0';
+                    IO_PRINTF("data: <%s>", this->data);
+
+                    // find newline
+                    char *pos = strchr((char *)this->data, c);
+
+                    if (pos == nullptr) {
+                        return 5;
+                    }
                 }
 
                 // include newline
                 pos++;
 
-                int len = pos  - (char *)this->data;
+                // line length
+                size_t len = pos  - (char *)this->data;
 
+                // will it fit the output buffer?
                 if (len > (max_size-1)) { // account for string termination
                     return 4;
                 }

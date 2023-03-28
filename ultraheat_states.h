@@ -106,14 +106,21 @@ namespace Ultraheat {
 
     };
 
+    class MessageStateObserver {
+        public:
+            virtual void notify_message_sent() = 0;
+    };
 
     class MessageState : public StateMachine::State {
 
         public:
-            MessageState(IO& io)
+            MessageState(IO& io, MessageStateObserver *observer)
                 : StateMachine::State()
                 , io(io)
+                , observer(observer)
             {}
+
+            unsigned int messages_sent = 0;
 
             void enter() override {
                 US_PRINTF("MessageState::enter()");
@@ -145,6 +152,9 @@ namespace Ultraheat {
                 if (buffer[0] == '!') {
                     US_PRINTF("message done!");
                     // TODO: send
+                    if (this->observer != nullptr) {
+                        this->observer->notify_message_sent();
+                    }
                     return true;
                 }
 
@@ -155,6 +165,7 @@ namespace Ultraheat {
 
         private:
             IO& io;
+            MessageStateObserver* observer;
             UltraheatParser parser;
             UltraheatMessage message;
     };

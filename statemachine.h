@@ -21,7 +21,7 @@ namespace StateMachine {
 
             virtual void enter() { SM_PRINTF("State::enter()"); };
             virtual bool tick() = 0;
-            virtual void transition_out() { SM_PRINTF("State::transition_out()"); };
+            virtual void exit() { SM_PRINTF("State::exit()"); };
 
             void set_next(State* state) {
                 this->next = state;

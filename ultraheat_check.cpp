@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 char * timestamp(){
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
     char * time = asctime(gmtime(&now));
     time[strlen(time)-1] = '\0';    // Remove \n
     return time;
@@ -17,6 +17,9 @@ char * timestamp(){
 #define UM_PRINTF(f_, ...) printf("%s ", timestamp()), printf("message: "), printf((f_), ##__VA_ARGS__), printf("\n")
 // ultraheat_parser
 #define UP_PRINTF(f_, ...) printf("%s ", timestamp()), printf("parser:  "), printf((f_), ##__VA_ARGS__), printf("\n")
+// ultraheat_parser
+#define IO_PRINTF(f_, ...) printf("%s ", timestamp()), printf("io:      "), printf((f_), ##__VA_ARGS__), printf("\n")
+#define FIO_PRINTF(f_, ...) printf("%s ", timestamp()), printf("fileio:  "), printf((f_), ##__VA_ARGS__), printf("\n")
 
 #include "statemachine.h"
 #include "ultraheat_states.h"
@@ -26,12 +29,16 @@ class FileIO : public Ultraheat::IO {
 
     public:
         FileIO(const std::string& data)
-            : data(data)
+            : Ultraheat::IO()
+            , data(data)
             , idx(0)
             , rand_available(0)
-            , Ultraheat::IO()
         {
-            std::srand(time(NULL));
+            std::srand(time(nullptr));
+        }
+
+        virtual void clear_buffers(void) {
+            this->idx = 0;
         }
 
         int available() override {
@@ -39,12 +46,12 @@ class FileIO : public Ultraheat::IO {
                 generate_next();
             }
 
-            std::cout << "available() == " << this->rand_available << std::endl;
+            FIO_PRINTF("available() == %d", this->rand_available);
             return this->rand_available;
         }
 
         bool read_array(uint8_t *data, size_t len) override {
-            std::cout << "read_array() == " << len << " of " << this->rand_available << std::endl;
+            FIO_PRINTF("read_array() == %lu of %d", len, this->rand_available);
             if (len == 0) {
                 // sort of timeout, don't allow reading 0 chars
                 return false;
@@ -55,7 +62,8 @@ class FileIO : public Ultraheat::IO {
                 return false;
             }
             memcpy(data, this->data.c_str() + this->idx, len);
-            data[len] = '\n';
+            data[len] = '\0';
+            FIO_PRINTF("data: <%s>", data);
             this->idx += len;
             this->rand_available -= len;
 
@@ -64,7 +72,7 @@ class FileIO : public Ultraheat::IO {
 
         void write_array(const uint8_t *data, size_t len) override {
             printf("Wrote[%ld]: ", len);
-            for (int i = 0; i < len; i++) {
+            for (unsigned int i = 0; i < len; i++) {
                 printf("%02x,", data[i]);
             }
             printf("\n");
@@ -73,12 +81,12 @@ class FileIO : public Ultraheat::IO {
     private:
         const std::string& data;
         unsigned int idx;
-        int rand_available;
+        unsigned int rand_available;
 
         void generate_next() {
             this->rand_available = std::rand() % (10+1); // [0..10]
             //std::cout << "raw rand_available: " << this->rand_available << std::endl;
-            //std::cout << "data.length: " << this->data.length() << " idx: " << this->idx << std::endl;
+            FIO_PRINTF("data.length: %lu, idx: %d", this->data.length(), this->idx);
 
             if (this->data.length() < (this->idx + this->rand_available)) {
                 this->rand_available = this->data.length() - this->idx;
@@ -119,32 +127,70 @@ F(0)9.20(71422831)6.35(60*m)
 !
 )raw";
 
+class UltraheatCheck : public Ultraheat::MessageStateObserver {
+
+    public:
+        UltraheatCheck()
+            : wakeup_io(data_wakeup)
+            , message_io(data_message)
+            , idle(1000)
+            , wakeup(this->wakeup_io)
+            , message(this->message_io, this)
+            , messages_sent(0)
+        {
+            this->idle.set_next(&this->wakeup);
+            this->wakeup.set_next(&this->message);
+            this->message.set_next(&this->idle);
+        }
+
+        void notify_message_sent() override {
+            this->messages_sent++;
+        }
+
+        int run() {
+            // setup
+            this->state = &wakeup;
+            this->state->enter();
+
+            // loop
+            // TODO 2: FILE_IO objects must be reset after each complete iteration
+            unsigned int iters = 0;
+            while (this->messages_sent < 3) {
+                if (this->state->tick()) {
+                    this->state->exit();
+                    this->state = state->get_next();
+                    this->state->enter();
+                }
+                // empty line separator between ticks
+                printf("\n");
+
+                if (++iters > 800) {
+                    printf("Sent %d messages in %d iterations\n", this->messages_sent, iters);
+                    printf("ERROR: too many iterations\n");
+                    return 1;
+                }
+            }
+
+            printf("Sent %d messages in %d iterations\n", this->messages_sent, iters);
+            printf("Check done!\n");
+            return 0;
+        }
+
+    private:
+        FileIO wakeup_io;
+        FileIO message_io;
+
+        Ultraheat::IdleState idle;
+        Ultraheat::WakeupState wakeup;
+        Ultraheat::MessageState message;
+
+        StateMachine::State* state;
+        unsigned int messages_sent;
+};
+
+
 int main (int argc, char *argv[]) {
 
-    // constructor
-    FileIO wakeup_io = FileIO(data_wakeup);
-    FileIO message_io = FileIO(data_message);
-
-    Ultraheat::IdleState idle(1000);
-    Ultraheat::WakeupState wakeup(wakeup_io);
-    Ultraheat::MessageState message(message_io);
-
-    idle.set_next(&wakeup);
-    wakeup.set_next(&message);
-    message.set_next(&idle);
-
-    StateMachine::State* state;
-
-    // setup
-    state = &wakeup;
-    state->enter();
-
-    // loop
-    for (int i = 0; i < 300; i++) {
-        if (state->tick()) {
-            state->transition_out();
-            state = state->get_next();
-            state->enter();
-        }
-    }
+    UltraheatCheck check;
+    return check.run();
 }
