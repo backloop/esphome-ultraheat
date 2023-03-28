@@ -135,16 +135,12 @@ class UltraheatCheck : public Ultraheat::MessageStateObserver {
             , message_io(data_message)
             , idle(1000)
             , wakeup(this->wakeup_io)
-            , message(this->message_io, this)
+            , message(this->message_io, *this)
             , messages_sent(0)
         {
             this->idle.set_next(&this->wakeup);
             this->wakeup.set_next(&this->message);
             this->message.set_next(&this->idle);
-        }
-
-        void notify_message_sent() override {
-            this->messages_sent++;
         }
 
         int run() {
@@ -174,6 +170,10 @@ class UltraheatCheck : public Ultraheat::MessageStateObserver {
             printf("Sent %d messages in %d iterations\n", this->messages_sent, iters);
             printf("Check done!\n");
             return 0;
+        }
+
+        void message_received(Ultraheat::UltraheatMessage& message) override {
+            this->messages_sent++;
         }
 
     private:

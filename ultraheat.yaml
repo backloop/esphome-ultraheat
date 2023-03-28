@@ -56,7 +56,6 @@ uart:
     parity: EVEN
     stop_bits: 2
 
-
 sensor:
 - platform: custom
   lambda: |-
