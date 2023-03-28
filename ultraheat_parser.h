@@ -17,7 +17,6 @@ namespace Ultraheat {
         public:
 
             void parseResponseRow(UltraheatMessage& message, char* row) {
-                char* saveptr = NULL;
 
                 // cannot use strtok() below as strtok() won't handle empty values
                 // like "()" as one would want (it consumes both delimiters simultaneously)
@@ -108,13 +107,13 @@ namespace Ultraheat {
                     // must split value
                     char* val = strtok(value, "*");
                     message.flow_temperature_max_c = atof(val);
-                    val = strtok(NULL, "*C&"); //ignore leading delimiters "C&", and terminate on "*"
+                    val = strtok(nullptr, "*C&"); //ignore leading delimiters "C&", and terminate on "*"
                     message.return_temperature_max_c = atof(val);
                 } else if (strcmp(obisCode, "9.4*01") == 0) {
                     // must split value
                     char* val = strtok(value, "*");
                     message.flow_temperature_max_previous_year_c = atof(val);
-                    val = strtok(NULL, "*C&"); //ignore leading delimiters "C&", and terminate on "*"
+                    val = strtok(nullptr, "*C&"); //ignore leading delimiters "C&", and terminate on "*"
                     message.return_temperature_max_previous_year_c = atof(val);
 
                 //9.6
