@@ -15,6 +15,13 @@
 #include "ultraheat_message.h"
 #include "ultraheat_io.h"
 
+# if defined(unix)
+#include <climits>
+#include <sys/time.h>
+#elif defined(_WIN32)
+// TODO
+#endif
+
 namespace Ultraheat {
 
     class IdleState : public StateMachine::State {
@@ -23,23 +30,45 @@ namespace Ultraheat {
             // inherit base class' constructors
             //using StateMachine::State::State;
 
-            IdleState(unsigned int idle_ms)
+            IdleState(unsigned int idle_s)
                 : StateMachine::State()
-                , idle_ms(idle_ms)
+                , idle_ms(idle_s * 1000)
             {}
 
             void enter() override {
                 US_PRINTF("IdleState::enter()");
-                // init idle counter
+                start_ms = millis();
             }
             bool tick() override {
-                US_PRINTF("IdleState::tick()");
-                // count idle time
-                return true;
+                // return true if enough time has passed
+                unsigned long current_ms = millis();
+                unsigned long delta_ms;
+                if (current_ms < start_ms) {
+                    // we have wrapped
+                    delta_ms = (ULONG_MAX - start_ms + current_ms);
+                } else {
+                    delta_ms = current_ms - start_ms;
+                }
+                US_PRINTF("IdleState::tick(%lu)", delta_ms);
+                return (delta_ms > idle_ms);
             }
 
         private:
-            unsigned int idle_ms;
+            unsigned long idle_ms;
+            unsigned long start_ms;
+
+#if defined(unix)
+            unsigned long millis() {
+                struct timeval time_now{};
+                gettimeofday(&time_now, nullptr); // ignore SUCCESS/FAIL return value for now
+
+                time_t msecs_time = (time_now.tv_sec * 1000) + (time_now.tv_usec / 1000);
+
+                return msecs_time;
+            }
+#elif defined(_WIN32)
+            // TODO
+#endif
     };
 
 
