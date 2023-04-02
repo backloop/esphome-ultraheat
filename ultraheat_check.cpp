@@ -2,6 +2,7 @@
 #include <cstring>
 #include <time.h>
 #include <stdio.h>
+#include <unistd.h>
 
 char * timestamp(){
     time_t now = time(nullptr);
@@ -133,7 +134,7 @@ class UltraheatCheck : public Ultraheat::MessageStateObserver {
         UltraheatCheck()
             : wakeup_io(data_wakeup)
             , message_io(data_message)
-            , idle(1000)
+            , idle(2 /*seconds between readouts*/)
             , wakeup(this->wakeup_io)
             , message(this->message_io, *this)
             , messages_sent(0)
@@ -160,11 +161,14 @@ class UltraheatCheck : public Ultraheat::MessageStateObserver {
                 // empty line separator between ticks
                 printf("\n");
 
-                if (++iters > 800) {
+                if (++iters > 1000) {
                     printf("Sent %d messages in %d iterations\n", this->messages_sent, iters);
                     printf("ERROR: too many iterations\n");
                     return 1;
                 }
+
+                // emulate Esphome's 16ms call frequency...
+                usleep(16000);
             }
 
             printf("Sent %d messages in %d iterations\n", this->messages_sent, iters);
