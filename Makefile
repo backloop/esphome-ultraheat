@@ -26,7 +26,7 @@ $(CHECK_PROG): Makefile $(HDR) $(CHECK_SRC)
 
 PHONY: install
 install: $(PROG)
-	esphome upload ultraheat.yaml
+	esphome upload $(PROG).yaml
 
 PHONY: ota
 ota: $(PROG_OTA)

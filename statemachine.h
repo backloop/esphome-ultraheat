@@ -16,32 +16,32 @@ namespace StateMachine {
         public:
 
             State ()
-                : next(nullptr)
+                : next_state(nullptr)
             {}
 
-            // executed when leaving a state
+            // executed when entering a state
             virtual void enter() { SM_PRINTF("State::enter()"); };
 
             // periodically called
-            // return: false - while exit condition is not met
-            //         true - when exit condition met
+            // return: false - if exit condition is not met
+            //         true  - if exit condition is met
             virtual bool tick() = 0;
 
-            // executed when entering a state
+            // executed when leaving a state
             virtual void exit() { SM_PRINTF("State::exit()"); };
 
-            void set_next(State* state) {
-                this->next = state;
+            void set_next_state(State* next_state) {
+                this->next_state = next_state;
             }
 
-            State* get_next() {
-                return this->next;
+            State* get_next_state() {
+                return this->next_state;
             }
 
         protected:
 
         private:
-            State* next;
+            State* next_state;
     };
 
 };

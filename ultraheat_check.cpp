@@ -28,6 +28,22 @@ char * timestamp(){
 
 class FileIO : public Ultraheat::IO {
 
+    private:
+        const std::string& data;
+        unsigned int idx;
+        unsigned int rand_available;
+
+        void generate_next() {
+            this->rand_available = std::rand() % (10+1); // [0..10]
+            //std::cout << "raw rand_available: " << this->rand_available << std::endl;
+            FIO_PRINTF("data.length: %lu, idx: %d", this->data.length(), this->idx);
+
+            if (this->data.length() < (this->idx + this->rand_available)) {
+                this->rand_available = this->data.length() - this->idx;
+            }
+            //std::cout << "rand: " << this->rand_available << std::endl;
+        }
+
     public:
         FileIO(const std::string& data)
             : Ultraheat::IO()
@@ -79,22 +95,6 @@ class FileIO : public Ultraheat::IO {
             printf("\n");
         }
 
-    private:
-        const std::string& data;
-        unsigned int idx;
-        unsigned int rand_available;
-
-        void generate_next() {
-            this->rand_available = std::rand() % (10+1); // [0..10]
-            //std::cout << "raw rand_available: " << this->rand_available << std::endl;
-            FIO_PRINTF("data.length: %lu, idx: %d", this->data.length(), this->idx);
-
-            if (this->data.length() < (this->idx + this->rand_available)) {
-                this->rand_available = this->data.length() - this->idx;
-            }
-            //std::cout << "rand: " << this->rand_available << std::endl;
-        }
-
 };
 
 
@@ -130,6 +130,17 @@ F(0)9.20(71422831)6.35(60*m)
 
 class UltraheatCheck : public Ultraheat::MessageStateObserver {
 
+    private:
+        FileIO wakeup_io;
+        FileIO message_io;
+
+        Ultraheat::IdleState idle;
+        Ultraheat::WakeupState wakeup;
+        Ultraheat::MessageState message;
+
+        StateMachine::State* state;
+        unsigned int messages_sent;
+
     public:
         UltraheatCheck()
             : wakeup_io(data_wakeup)
@@ -139,13 +150,14 @@ class UltraheatCheck : public Ultraheat::MessageStateObserver {
             , message(this->message_io, *this)
             , messages_sent(0)
         {
-            this->idle.set_next(&this->wakeup);
-            this->wakeup.set_next(&this->message);
-            this->message.set_next(&this->idle);
+            // setup state machine graph
+            this->idle.set_next_state(&this->wakeup);
+            this->wakeup.set_next_state(&this->message);
+            this->message.set_next_state(&this->idle);
         }
 
         int run() {
-            // setup
+            // set initial state
             this->state = &wakeup;
             this->state->enter();
 
@@ -155,7 +167,7 @@ class UltraheatCheck : public Ultraheat::MessageStateObserver {
             while (this->messages_sent < 3) {
                 if (this->state->tick()) {
                     this->state->exit();
-                    this->state = state->get_next();
+                    this->state = state->get_next_state();
                     this->state->enter();
                 }
                 // empty line separator between ticks
@@ -179,17 +191,6 @@ class UltraheatCheck : public Ultraheat::MessageStateObserver {
         void message_received(Ultraheat::UltraheatMessage& message) override {
             this->messages_sent++;
         }
-
-    private:
-        FileIO wakeup_io;
-        FileIO message_io;
-
-        Ultraheat::IdleState idle;
-        Ultraheat::WakeupState wakeup;
-        Ultraheat::MessageState message;
-
-        StateMachine::State* state;
-        unsigned int messages_sent;
 };
 
 

@@ -1,6 +1,8 @@
 #ifndef ULTRAHEAT_IO
 #define ULTRAHEAT_IO
 
+#include <cstdint>
+
 #define DATA_SIZE (128)
 #define LINE_SIZE (DATA_SIZE - 1) // make space for string termination
 
