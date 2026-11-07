@@ -1,7 +1,6 @@
 #ifndef STATEMACHINE
 #define STATEMACHINE
 
-#include <iostream>
 #include <cstring>
 #include <stdio.h>
 

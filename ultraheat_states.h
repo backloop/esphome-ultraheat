@@ -1,7 +1,6 @@
 #ifndef ULTRAHEAT_STATES
 #define ULTRAHEAT_STATES
 
-#include <iostream>
 #include <cstring>
 #include <stdio.h>
 #include <vector>
