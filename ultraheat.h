@@ -137,9 +137,9 @@ class UltraheatReader : public Component, public UARTDevice, public Ultraheat::M
             pinMode(DEBUG_PIN, OUTPUT);
             digitalWrite(DEBUG_PIN, LOW);
 
-            this->idle.set_next(&this->wakeup);
-            this->wakeup.set_next(&this->message);
-            this->message.set_next(&this->idle);
+            this->idle.set_next_state(&this->wakeup);
+            this->wakeup.set_next_state(&this->message);
+            this->message.set_next_state(&this->idle);
             this->state = &this->wakeup;
         }
 
@@ -155,7 +155,7 @@ class UltraheatReader : public Component, public UARTDevice, public Ultraheat::M
         void loop() override {
             if (this->state->tick()) {
                 this->state->exit();
-                this->state = state->get_next();
+                this->state = state->get_next_state();
                 this->state->enter();
             }
         }
