@@ -1,13 +1,13 @@
 esphome:
   name: ultraheat
   includes:
-    - ultraheat_debug.h
-    - ultraheat_message.h
-    - ultraheat_parser.h
-    - statemachine.h
-    - ultraheat_io.h
-    - ultraheat_states.h
-    - ultraheat.h
+    - src/ultraheat_debug.h
+    - src/ultraheat_message.h
+    - src/ultraheat_parser.h
+    - src/statemachine.h
+    - src/ultraheat_io.h
+    - src/ultraheat_states.h
+    - src/ultraheat.h
   platformio_options:
     build_flags:
       - "-Wl,-Map=output.map"

@@ -1,14 +1,17 @@
 
+SRC_DIR = src
+
 PROG = ultraheat
-HDR = ultraheat_io.h ultraheat_parser.h ultraheat_message.h ultraheat_states.h statemachine.h
+HDR = $(addprefix $(SRC_DIR)/, ultraheat_io.h ultraheat_parser.h ultraheat_message.h ultraheat_states.h statemachine.h)
+PROG_HDR = $(addprefix $(SRC_DIR)/, ultraheat.h ultraheat_debug.h)
 OTHER_SRC = ultraheat.yaml secrets.yaml
 
 PROG_OTA = ultraheat_ota
 
 CHECK_PROG = ultraheat_check
-CHECK_SRC = ultraheat_check.cpp
+CHECK_SRC = $(SRC_DIR)/ultraheat_check.cpp
 
-$(PROG): Makefile $(HDR) $(OTHER_SRC)
+$(PROG): Makefile $(HDR) $(PROG_HDR) $(OTHER_SRC)
 	esphome compile $(PROG).yaml
 	#esphome -v compile $(PROG).yaml
 	# map file is generated through platformio_options: build_flags in ultraheat.yaml
@@ -18,7 +21,7 @@ $(PROG): Makefile $(HDR) $(OTHER_SRC)
 
 	/home/backloop/.platformio/packages/toolchain-xtensa/bin/xtensa-lx106-elf-nm --demangle --print-size --size-sort --radix=d --line-numbers ./.esphome/build/ultraheat/.pioenvs/ultraheat/firmware.elf > firmware.sizes
 
-$(PROG_OTA): Makefile $(PROG_OTA).h
+$(PROG_OTA): Makefile $(SRC_DIR)/$(PROG_OTA).h $(PROG_OTA).yaml
 	esphome compile $(PROG_OTA).yaml
 
 $(CHECK_PROG): Makefile $(HDR) $(CHECK_SRC)
